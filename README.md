@@ -9,6 +9,8 @@ A Next.js 15+ application that allows users to explore historical events that oc
 - **Real-time Results**: Right-hand drawer displays events ordered by distance
 - **Responsive Design**: Clean, modern UI built with Tailwind CSS
 - **Performance Optimized**: Debounced API calls and 1-hour caching
+- **User Authentication**: Secure login/signup with Supabase, including Google OAuth
+- **Protected Routes**: Application is secured behind authentication
 
 ## Tech Stack
 
@@ -18,6 +20,8 @@ A Next.js 15+ application that allows users to explore historical events that oc
 - **Maps**: Mapbox GL JS
 - **Data Source**: Wikidata SPARQL API
 - **Caching**: Next.js unstable_cache
+- **Authentication**: Supabase Auth with OAuth providers
+- **Database**: Supabase PostgreSQL (optional)
 
 ## Quick Start
 
@@ -26,32 +30,54 @@ A Next.js 15+ application that allows users to explore historical events that oc
    npm install
    ```
 
-2. **Set up environment variables**:
+2. **Set up Supabase authentication**:
+   Follow the detailed setup guide in [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
+   
+   Quick setup:
+   - Create a Supabase project at [supabase.com](https://supabase.com)
+   - Copy your project URL and anon key
+   - Create `.env.local` with your credentials
+
+3. **Set up environment variables**:
    ```bash
    npm run setup
    ```
    
-   This will create a `.env.local` file. Edit it and add your Mapbox token:
+   This will create a `.env.local` file. Edit it and add your credentials:
    ```
-   NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
    ```
    
    Get a free Mapbox token from [mapbox.com](https://account.mapbox.com/access-tokens/)
 
-3. **Run the development server**:
+4. **Run the development server**:
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**:
+5. **Open your browser**:
    Navigate to [http://localhost:3000](http://localhost:3000)
+   You'll be redirected to `/auth` to create an account or sign in
+
+## Authentication Features
+
+- **User Registration**: Create accounts with username, email, and password
+- **User Login**: Sign in with email/password
+- **Google OAuth**: One-click sign-in with Google accounts
+- **Protected Routes**: All application features require authentication
+- **Session Management**: Automatic session handling and refresh
+- **User Profiles**: Display username and email in the top-right corner
 
 ## Usage
 
-1. **Click anywhere on the map** to place a draggable marker
-2. **Drag the marker** to a new location to update results
-3. **View historical events** in the right-hand drawer
-4. **Click on event pins** on the map for detailed popups
+1. **Sign up or log in** at the authentication page
+2. **Click anywhere on the map** to place a draggable marker
+3. **Drag the marker** to a new location to update results
+4. **View historical events** in the right-hand drawer
+5. **Click on event pins** on the map for detailed popups
+6. **Sign out** using the button in the top-right corner
 
 ## API Endpoints
 
@@ -63,13 +89,26 @@ Query historical events near a location.
 - `lat` (number): Latitude of the center point
 - `lng` (number): Longitude of the center point  
 - `r` (number): Search radius in kilometers (default: 80, max: 500)
+- `coordinates` (boolean): If `true`, returns only coordinates; if `false` or omitted, returns full event details
 
 **Response**: GeoJSON FeatureCollection with historical events
 
-**Example**:
+**Examples**:
+
+**Full response with all properties**:
 ```
 GET /api/events?lat=40.7128&lng=-74.0060&r=80
 ```
+
+**Coordinates-only response**:
+```
+GET /api/events?lat=40.7128&lng=-74.0060&r=80&coordinates=true
+```
+
+**Response formats**:
+
+*Full response* includes: `id`, `label`, `description`, `date`, `distance`, `wikipediaUrl`, `imageUrl`
+*Coordinates-only response* includes: only `coordinates` in properties
 
 ## Architecture
 

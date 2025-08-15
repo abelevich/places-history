@@ -13,14 +13,37 @@ interface EventsDrawerProps {
 export function EventsDrawer({ events, isLoading, error, selectedLocation, radius }: EventsDrawerProps) {
   const formatDate = (dateString: string): string => {
     try {
+      // Handle "Unknown date" case
+      if (dateString === 'Unknown date' || !dateString) {
+        return 'Date unknown'
+      }
+      
+      // If it's already in YYYY-MM-DD format, format it nicely
+      if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const date = new Date(dateString)
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        }
+      }
+      
+      // Try parsing as ISO date
       const date = new Date(dateString)
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
-    } catch {
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      }
+      
+      // If all else fails, return the original string
       return dateString
+    } catch {
+      return dateString || 'Date unknown'
     }
   }
 
@@ -31,16 +54,6 @@ export function EventsDrawer({ events, isLoading, error, selectedLocation, radiu
 
   return (
     <div className="w-96 bg-white border-l border-gray-200 flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <h1 className="text-xl font-semibold text-gray-900">Historical Events</h1>
-        {selectedLocation && (
-          <p className="text-sm text-gray-600 mt-1">
-            Near {selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}
-          </p>
-        )}
-      </div>
-
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {isLoading && (
@@ -83,6 +96,33 @@ export function EventsDrawer({ events, isLoading, error, selectedLocation, radiu
                       <p className="text-xs text-gray-600 mt-2 line-clamp-2">
                         {event.properties.description}
                       </p>
+                    )}
+                    {event.properties.wikipediaUrl && (
+                      <a
+                        href={event.properties.wikipediaUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 hover:underline mt-2"
+                      >
+                        <svg
+                          className="w-3 h-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4.25 5.5a.75.75 0 00-.75.75v7.5c0 .414.336.75.75.75h7.5a.75.75 0 00.75-.75v-7.5a.75.75 0 00-.75-.75h-7.5zM2 5.5a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0114 5.5v7.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 012 13v-7.5z"
+                            clipRule="evenodd"
+                          />
+                          <path
+                            fillRule="evenodd"
+                            d="M10.75 2a.75.75 0 00-.75.75v.5a.75.75 0 00.75.75h.5a.75.75 0 00.75-.75v-.5a.75.75 0 00-.75-.75h-.5zM10 2a.75.75 0 00-.75.75v.5c0 .414.336.75.75.75h.5a.75.75 0 00.75-.75v-.5A.75.75 0 0010.5 2H10z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Read on Wikipedia
+                      </a>
                     )}
                   </div>
                   {event.properties.distance && (

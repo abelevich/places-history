@@ -8,7 +8,7 @@ import { HistoricalEvent } from '@/types/events'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 // Set Mapbox access token
-const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
+const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ''
 mapboxgl.accessToken = mapboxToken
 
 // Debug token
@@ -163,7 +163,7 @@ export function MapComponent({ onMapClick, events, selectedLocation, radius }: M
 
     // Check if token is available
     if (!mapboxToken) {
-      console.error('Mapbox token is not set. Please add NEXT_PUBLIC_MAPBOX_TOKEN to your .env.local file')
+      console.error('Mapbox token is not set. Please add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to your .env.local file')
       setHasTokenError(true)
       return
     }
@@ -201,7 +201,7 @@ export function MapComponent({ onMapClick, events, selectedLocation, radius }: M
         console.log('Token length:', mapboxToken.length)
         
         if (!mapboxToken) {
-          console.error('Mapbox token is not set. Please add NEXT_PUBLIC_MAPBOX_TOKEN to your .env.local file')
+          console.error('Mapbox token is not set. Please add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to your .env.local file')
           setHasTokenError(true)
           return
         }
@@ -317,17 +317,33 @@ export function MapComponent({ onMapClick, events, selectedLocation, radius }: M
 
   // Update event markers when events change
   useEffect(() => {
+    console.log('MapComponent: Events changed, events.length =', events.length)
+    console.log('MapComponent: map.current =', !!map.current)
+    console.log('MapComponent: isMapReady =', isMapReady)
+    console.log('MapComponent: Sample event =', events[0])
+    
     // Remove existing event markers
     eventMarkers.current.forEach(marker => marker.remove())
     eventMarkers.current = []
 
-    if (!map.current || !isMapReady || events.length === 0) return
+    if (!map.current || !isMapReady || events.length === 0) {
+      console.log('MapComponent: Early return - no map, not ready, or no events')
+      return
+    }
 
     // Add new event markers
     events.forEach((event) => {
       const el = document.createElement('div')
-      el.className = 'w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg cursor-pointer'
-      el.title = `${event.properties.label} (${event.properties.date})`
+      
+      // Different marker styles based on whether the event has an image
+      if (event.properties.imageUrl) {
+        el.className = 'w-5 h-5 bg-blue-600 rounded-full border-2 border-white shadow-lg cursor-pointer'
+        el.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.4)'
+        el.title = `${event.properties.label} (${event.properties.date}) - Has image`
+      } else {
+        el.className = 'w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg cursor-pointer'
+        el.title = `${event.properties.label} (${event.properties.date})`
+      }
 
       const eventMarker = new mapboxgl.Marker(el)
         .setLngLat([event.geometry.coordinates[0], event.geometry.coordinates[1]])
@@ -336,17 +352,37 @@ export function MapComponent({ onMapClick, events, selectedLocation, radius }: M
       // Add popup on click
       const popup = new mapboxgl.Popup({ offset: 25 })
         .setHTML(`
-          <div class="p-2">
-            <h3 class="font-semibold text-sm">${event.properties.label}</h3>
-            <p class="text-xs text-gray-600">${event.properties.date}</p>
-            ${event.properties.description ? `<p class="text-xs mt-1">${event.properties.description}</p>` : ''}
-            ${event.properties.distance ? `<p class="text-xs text-blue-600 mt-1">${event.properties.distance.toFixed(1)} km away</p>` : ''}
+          <div class="p-3 max-w-xs">
+            ${event.properties.imageUrl ? `
+              <div class="mb-3">
+                <img 
+                  src="${event.properties.imageUrl}" 
+                  alt="${event.properties.label}"
+                  class="w-full h-32 object-cover rounded-lg shadow-sm"
+                  onerror="this.style.display='none'"
+                />
+              </div>
+            ` : `
+              <div class="mb-3 bg-gray-100 rounded-lg h-32 flex items-center justify-center">
+                <div class="text-center text-gray-500">
+                  <div class="text-4xl mb-2">🏛️</div>
+                  <div class="text-xs">No image available</div>
+                </div>
+              </div>
+            `}
+            <h3 class="font-semibold text-sm mb-2">${event.properties.label}</h3>
+            <p class="text-xs text-gray-600 mb-2">${event.properties.date}</p>
+            ${event.properties.description ? `<p class="text-xs text-gray-700 mb-2 leading-relaxed">${event.properties.description}</p>` : ''}
+            ${event.properties.distance ? `<p class="text-xs text-blue-600 mb-2">📍 ${event.properties.distance.toFixed(1)} km away</p>` : ''}
+            ${event.properties.wikipediaUrl ? `<a href="${event.properties.wikipediaUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline block">📚 Read on Wikipedia</a>` : ''}
           </div>
         `)
 
       eventMarker.setPopup(popup)
       eventMarkers.current.push(eventMarker)
     })
+    
+    console.log('MapComponent: Added', eventMarkers.current.length, 'event markers')
   }, [events, isMapReady])
 
   console.log('MapComponent rendering, mapContainer ref:', !!mapContainer.current)

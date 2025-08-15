@@ -15,6 +15,7 @@ export interface HistoricalEvent {
     date: string
     distance?: number
     wikipediaUrl?: string
+    imageUrl?: string
   }
 }
 
@@ -34,6 +35,21 @@ export interface EventFeature {
     date: string
     distance?: number
     wikipediaUrl?: string
+    imageUrl?: string
+  }
+}
+
+/**
+ * GeoJSON Feature for coordinates-only response
+ */
+export interface CoordinatesFeature {
+  type: 'Feature'
+  geometry: {
+    type: 'Point'
+    coordinates: [number, number] // [lng, lat]
+  }
+  properties: {
+    coordinates: [number, number] // [lng, lat]
   }
 }
 
@@ -43,6 +59,14 @@ export interface EventFeature {
 export interface EventsResponse {
   type: 'FeatureCollection'
   features: EventFeature[]
+}
+
+/**
+ * GeoJSON FeatureCollection response for coordinates-only API
+ */
+export interface CoordinatesResponse {
+  type: 'FeatureCollection'
+  features: CoordinatesFeature[]
 }
 
 /**
@@ -68,6 +92,12 @@ export interface WikidataItem {
     value: string
   }
   distance?: {
+    value: string
+  }
+  wikipediaUrl?: {
+    value: string
+  }
+  imageUrl?: {
     value: string
   }
 } 
