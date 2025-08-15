@@ -88,7 +88,7 @@ Query historical events near a location.
 **Parameters**:
 - `lat` (number): Latitude of the center point
 - `lng` (number): Longitude of the center point  
-- `r` (number): Search radius in kilometers (default: 80, max: 500)
+- `r` (number): Search radius in kilometers (default: 16.09, max: 500)
 - `coordinates` (boolean): If `true`, returns only coordinates; if `false` or omitted, returns full event details
 
 **Response**: GeoJSON FeatureCollection with historical events
@@ -97,12 +97,12 @@ Query historical events near a location.
 
 **Full response with all properties**:
 ```
-GET /api/events?lat=40.7128&lng=-74.0060&r=80
+GET /api/events?lat=40.7128&lng=-74.0060&r=16.09
 ```
 
 **Coordinates-only response**:
 ```
-GET /api/events?lat=40.7128&lng=-74.0060&r=80&coordinates=true
+GET /api/events?lat=40.7128&lng=-74.0060&r=16.09&coordinates=true
 ```
 
 **Response formats**:

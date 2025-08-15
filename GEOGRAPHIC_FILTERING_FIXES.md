@@ -69,11 +69,12 @@ if (isWithinRadius) {
 return isWithinRadius
 ```
 
-### 4. **Increased Default Radius**
+### 4. **Configurable Default Radius**
 ```typescript
-// Increased from 16.0934 km (10 miles) to 50 km for better historical event coverage
+// Currently set to 10 miles (16.0934 km) for focused local searches
 // This radius provides a good balance between relevance and finding meaningful historical events
-const [radius] = useState(50) // 50 km radius for better historical event coverage
+// The radius is now easily configurable via src/lib/config.ts
+const [radius] = useState(DEFAULT_RADIUS_KM) // 10 miles radius converted to kilometers
 ```
 
 ### 5. **Enhanced Debugging and Logging**
@@ -98,17 +99,16 @@ npm run dev
 ```
 Improved bounding box calculation:
   Center: { lat: 40.7128, lng: -74.006 }
-  Radius: 50 km
-  Lat delta: 0.4491 degrees
-  Lng delta: 0.5874 degrees
-  Bounding box: { minLat: 40.2637, maxLat: 41.1619, minLng: -74.5934, maxLng: -73.4186 }
+  Radius: 16.09 km
+  Lat delta: 0.1445 degrees
+  Lng delta: 0.1889 degrees
+  Bounding box: { minLat: 40.5683, maxLat: 40.8573, minLng: -74.1889, maxLng: -73.8231 }
 
 ✅ Item "Some Historical Event" at (40.7589, -73.9851) is 12.3km away
 ❌ Item "Distant Event" at (42.1234, -71.5678) is 156.7km away - OUTSIDE RADIUS
-```
 
 ### 4. **Verify Results**
-- All returned events should be within 50km of NYC
+- All returned events should be within 16.09km of NYC
 - Check that no events appear from distant locations
 - Verify the radius circle on the map matches the search area
 
@@ -121,15 +121,15 @@ Improved bounding box calculation:
    - Added comprehensive logging
 
 2. **`src/app/page.tsx`**
-   - Increased default radius from 16.0934km to 50km
+   - Updated to use centralized configuration (currently 16.09km)
    - Added explanatory comments
 
 ## Expected Results
 
 - **Before**: Events from thousands of miles away (e.g., Europe, Asia)
-- **After**: Events only from within the specified radius (50km for NYC)
+- **After**: Events only from within the specified radius (16.09km for NYC)
 - **Improved Accuracy**: Geographic filtering now works as expected
-- **Better Coverage**: 50km radius provides meaningful historical event coverage
+- **Better Coverage**: 10-mile radius provides focused local historical event coverage
 - **Enhanced Debugging**: Clear visibility into filtering decisions
 
 ## Technical Details

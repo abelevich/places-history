@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { EventsResponse, WikidataItem, EventFeature, CoordinatesResponse, CoordinatesFeature } from '@/types/events'
 import { getEventImageUrl, getOptimizedImageUrl } from '@/lib/image-utils'
+import { DEFAULT_RADIUS_KM } from '@/lib/config'
 
 /**
  * KEY FIXES APPLIED TO RESOLVE GEOGRAPHIC FILTERING ISSUES:
@@ -704,7 +705,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const lat = parseFloat(searchParams.get('lat') || '0')
     const lng = parseFloat(searchParams.get('lng') || '0')
-    const radius = parseFloat(searchParams.get('r') || '80')
+    const radius = parseFloat(searchParams.get('r') || DEFAULT_RADIUS_KM.toString())
     const coordinatesOnly = searchParams.get('coordinates') === 'true'
     
     // Add temporal filtering parameters - default to last 500 years for historical relevance

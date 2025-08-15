@@ -7,6 +7,7 @@ import { EventsDrawer } from '@/components/EventsDrawer'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { UserProfile } from '@/components/auth/UserProfile'
 import { HistoricalEvent } from '@/types/events'
+import { DEFAULT_RADIUS_KM } from '@/lib/config'
 
 // Dynamically import Mapbox to avoid SSR issues
 const MapComponentWithNoSSR = dynamic(() => import('@/components/MapComponent').then(mod => ({ default: mod.MapComponent })), {
@@ -19,9 +20,9 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>({ lat: 40.7128, lng: -74.0060 }) // Default to NYC
-  // Set to 50 miles (80.47 km) for proper 50-mile radius filtering
-  // 1 mile = 1.60934 km, so 50 miles = 80.47 km
-  const [radius] = useState(80.47) // 50 miles radius converted to kilometers
+  // Use centralized configuration for easy radius management
+  // Currently set to 10 miles (16.0934 km) for more focused local searches
+  const [radius] = useState(DEFAULT_RADIUS_KM) // 10 miles radius converted to kilometers
 
   const fetchEvents = useCallback(async (lat: number, lng: number) => {
     setIsLoading(true)
