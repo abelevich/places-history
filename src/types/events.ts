@@ -1,6 +1,6 @@
 /**
- * Represents a historical event with location and temporal data
- * Updated to match GeoJSON Feature structure from API
+ * GeoJSON Feature representing a historical event with location and temporal data.
+ * Used by both the API response and the frontend components.
  */
 export interface HistoricalEvent {
   type: 'Feature'
@@ -19,42 +19,11 @@ export interface HistoricalEvent {
   }
 }
 
-/**
- * GeoJSON Feature for historical events
- */
-export interface EventFeature {
-  type: 'Feature'
-  geometry: {
-    type: 'Point'
-    coordinates: [number, number] // [lng, lat]
-  }
-  properties: {
-    id: string
-    label: string
-    description?: string
-    date: string
-    distance?: number
-    wikipediaUrl?: string
-    imageUrl?: string
-  }
-}
+/** Alias kept for backward compatibility with API internals. */
+export type EventFeature = HistoricalEvent
 
 /**
- * GeoJSON Feature for coordinates-only response
- */
-export interface CoordinatesFeature {
-  type: 'Feature'
-  geometry: {
-    type: 'Point'
-    coordinates: [number, number] // [lng, lat]
-  }
-  properties: {
-    coordinates: [number, number] // [lng, lat]
-  }
-}
-
-/**
- * GeoJSON FeatureCollection response from API
+ * GeoJSON FeatureCollection returned by the /api/events endpoint.
  */
 export interface EventsResponse {
   type: 'FeatureCollection'
@@ -62,42 +31,16 @@ export interface EventsResponse {
 }
 
 /**
- * GeoJSON FeatureCollection response for coordinates-only API
- */
-export interface CoordinatesResponse {
-  type: 'FeatureCollection'
-  features: CoordinatesFeature[]
-}
-
-/**
- * Wikidata SPARQL query result item
+ * Wikidata SPARQL query result item (intermediate representation).
  */
 export interface WikidataItem {
-  item: {
-    value: string // Q-number
-  }
-  itemLabel: {
-    value: string
-  }
-  itemDescription?: {
-    value: string
-  }
-  date: {
-    value: string // ISO date string
-  }
-  lat: {
-    value: string
-  }
-  lng: {
-    value: string
-  }
-  distance?: {
-    value: string
-  }
-  wikipediaUrl?: {
-    value: string
-  }
-  imageUrl?: {
-    value: string
-  }
-} 
+  item: { value: string }
+  itemLabel: { value: string }
+  itemDescription?: { value: string }
+  date: { value: string }
+  lat: { value: string }
+  lng: { value: string }
+  distance?: { value: string }
+  wikipediaUrl?: { value: string }
+  imageUrl?: { value: string }
+}

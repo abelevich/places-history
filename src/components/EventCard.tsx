@@ -1,159 +1,67 @@
 'use client'
 
 import { useState } from 'react'
-import { EventFeature } from '@/types/events'
-import { getPlaceholderImageUrl } from '@/lib/image-utils'
+import { HistoricalEvent } from '@/types/events'
+import { formatDisplayDate, formatDistance } from '@/lib/date-utils'
 
 interface EventCardProps {
-  event: EventFeature
-  onClose?: () => void
+  event: HistoricalEvent
+  onClick?: () => void
 }
 
-export function EventCard({ event, onClose }: EventCardProps) {
+export function EventCard({ event, onClick }: EventCardProps) {
   const [imageError, setImageError] = useState(false)
-  const [imageLoading, setImageLoading] = useState(true)
-
-  const handleImageLoad = () => {
-    setImageLoading(false)
-    setImageError(false)
-  }
-
-  const handleImageError = () => {
-    setImageError(true)
-    setImageLoading(false)
-  }
-
-  const formatDate = (dateString: string) => {
-    try {
-      // Handle "Unknown date" case
-      if (dateString === 'Unknown date' || !dateString) {
-        return 'Date unknown'
-      }
-      
-      // If it's already in YYYY-MM-DD format, format it nicely
-      if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const date = new Date(dateString)
-        if (!isNaN(date.getTime())) {
-          return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })
-        }
-      }
-      
-      // Try parsing as ISO date
-      const date = new Date(dateString)
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })
-      }
-      
-      // If all else fails, return the original string
-      return dateString
-    } catch {
-      return dateString || 'Date unknown'
-    }
-  }
-
-  const getImageUrl = () => {
-    if (event.properties.imageUrl && !imageError) {
-      return event.properties.imageUrl
-    }
-    return getPlaceholderImageUrl(event.properties.label)
-  }
+  const { label, description, date, distance, wikipediaUrl, imageUrl } = event.properties
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-sm">
-      {/* Image Section */}
-      <div className="relative h-48 bg-gray-100">
-        {imageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <div
+      className={`p-4 hover:bg-gray-50 transition-colors ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={onClick}
+    >
+      <div className="flex gap-3">
+        {/* Thumbnail */}
+        {imageUrl && !imageError ? (
+          <div className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
+            <img
+              src={imageUrl}
+              alt={label}
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
           </div>
-        )}
-        
-        <img
-          src={getImageUrl()}
-          alt={event.properties.label}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${
-            imageLoading ? 'opacity-0' : 'opacity-100'
-          }`}
-          onLoad={handleImageLoad}
-          onError={handleImageError}
-        />
-        
-        {imageError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-            <div className="text-center text-gray-500">
-              <div className="text-4xl mb-2">🏛️</div>
-              <div className="text-sm">No image available</div>
-            </div>
-          </div>
-        )}
-      </div>
+        ) : null}
 
-      {/* Content Section */}
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 leading-tight">
-            {event.properties.label}
-          </h3>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Close"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          {/* Date */}
-          <div className="flex items-center text-sm text-gray-600">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            {formatDate(event.properties.date)}
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-medium text-gray-900 text-sm leading-tight truncate">
+              {label}
+            </h3>
+            {distance != null && (
+              <span className="text-[11px] text-blue-600 font-medium whitespace-nowrap flex-shrink-0">
+                {formatDistance(distance)}
+              </span>
+            )}
           </div>
 
-          {/* Distance */}
-          {event.properties.distance && (
-            <div className="flex items-center text-sm text-blue-600">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              {event.properties.distance.toFixed(1)} km away
-            </div>
+          <p className="text-xs text-gray-500 mt-0.5">{formatDisplayDate(date)}</p>
+
+          {description && (
+            <p className="text-xs text-gray-600 mt-1 line-clamp-2">{description}</p>
           )}
 
-          {/* Description */}
-          {event.properties.description && (
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {event.properties.description}
-            </p>
-          )}
-
-          {/* Wikipedia Link */}
-          {event.properties.wikipediaUrl && (
+          {wikipediaUrl && (
             <a
-              href={event.properties.wikipediaUrl}
+              href={wikipediaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 hover:underline mt-1.5"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
-              Read on Wikipedia
+              Wikipedia
             </a>
           )}
         </div>
